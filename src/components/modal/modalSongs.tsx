@@ -12,6 +12,8 @@ import {
 } from "@radix-ui/react-alert-dialog";
 import { RxCross2 } from "react-icons/rx";
 import TableProvider from "../provider/TableProvider";
+import { Badge } from "../ui/badge";
+import PlayButton from "../buttons/PlayButton";
 
 interface ModalSongsProps {
   songs: Song[];
@@ -39,6 +41,30 @@ export default function ModalSongs({ songs }: ModalSongsProps) {
               {
                 header: "Id",
                 accessorKey: "songId",
+              },
+              {
+                header: "Title",
+                accessorKey: "title",
+              },
+              {
+                header: "Views",
+                accessorKey: "views",
+              },
+              {
+                header: "Status",
+                cell(props) {
+                  return (
+                    <Badge>
+                      {props.row.original.status ? "Active" : "Inactive"}
+                    </Badge>
+                  );
+                },
+              },
+              {
+                header: "Song",
+                cell(props) {
+                  return <PlayButton file={props.row.original?.file} />;
+                },
               },
             ]}
           />
