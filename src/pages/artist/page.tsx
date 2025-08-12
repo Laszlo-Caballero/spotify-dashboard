@@ -6,22 +6,33 @@ import { EnvConfig } from "@/config/env";
 import { Badge } from "@/components/ui/badge";
 import { cx } from "class-variance-authority";
 import ModalAlbum from "@/components/modal/modalAlbum";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { MdDelete, MdEdit } from "react-icons/md";
 
 export default function ArtistPage() {
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["artists"],
     queryFn: getAllArtist,
   });
-
-  console.log(data, isLoading, error);
 
   return (
     <div className="flex flex-col h-full">
       {isLoading && <Load />}
 
-      <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0">
-        Artists
-      </h2>
+      <div className="flex justify-between">
+        <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0">
+          Artists
+        </h2>
+        <Button asChild>
+          <Link to="/artist/create">Add Artist</Link>
+        </Button>
+      </div>
 
       <TableProvider
         data={data?.data || []}
@@ -77,6 +88,35 @@ export default function ArtistPage() {
             header: "Albums",
             cell: (props) => {
               return <ModalAlbum album={props.row.original.albums} />;
+            },
+          },
+          {
+            header: "Actions",
+            cell: (props) => {
+              return (
+                <div className="flex gap-x-2">
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button variant="secondary" asChild>
+                        <Link
+                          to={`/artist/edit/${props.row.original.artistId}`}
+                        >
+                          <MdEdit />
+                        </Link>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Edit artist</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Button variant="destructive" onClick={() => {}}>
+                        <MdDelete />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Delete artist</TooltipContent>
+                  </Tooltip>
+                </div>
+              );
             },
           },
         ]}
