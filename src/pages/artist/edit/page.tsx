@@ -38,7 +38,7 @@ export default function EditPage() {
   useEffect(() => {
     async function loadArtist() {
       if (artistData) {
-        form.setValue("Name", artistData.data.Name);
+        form.setValue("Name", artistData.data.name);
         form.setValue("description", artistData.data.description);
         form.setValue("fileRes", artistData.data.file);
 

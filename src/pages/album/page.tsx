@@ -3,20 +3,32 @@ import ModalSongs from "@/components/modal/modalSongs";
 import TableProvider from "@/components/provider/TableProvider";
 import Load from "@/components/shared/Load/Load";
 import { Button } from "@/components/ui/button";
-import { getAllAlbums } from "@/services/albumService";
+import { deleteAlbum, getAllAlbums } from "@/services/albumService";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { MdDelete, MdEdit } from "react-icons/md";
 import { Link } from "react-router";
 import { EnvConfig } from "@/config/env";
+import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { cx } from "class-variance-authority";
 
 export default function AlbumPage() {
+  const { mutate, isPending } = useMutation<unknown, Error, string>({
+    mutationFn: (id) => deleteAlbum(id),
+    onSuccess: () => {
+      toast.success("Album deleted successfully!");
+    },
+    onError: () => {
+      toast.error("Error deleting album");
+    },
+  });
   const { data, isLoading } = useQuery({
-    queryKey: ["albums"],
+    queryKey: ["albums", isPending],
     queryFn: getAllAlbums,
   });
 
@@ -56,7 +68,7 @@ export default function AlbumPage() {
             },
           },
           {
-            accessorKey: "NameAlbum",
+            accessorKey: "nameAlbum",
             header: "Title",
           },
           {
@@ -74,6 +86,20 @@ export default function AlbumPage() {
           {
             accessorKey: "releaseDate",
             header: "Release Date",
+          },
+          {
+            header: "Status",
+            cell: (props) => {
+              return (
+                <Badge
+                  className={cx(
+                    props.row.original.status ? "bg-green-500" : "bg-red-500"
+                  )}
+                >
+                  {props.row.original.status ? "Active" : "Inactive"}
+                </Badge>
+              );
+            },
           },
           {
             header: "Actions",
@@ -95,7 +121,7 @@ export default function AlbumPage() {
                       <Button
                         variant="destructive"
                         onClick={() => {
-                          // mutate(props.row.original.artistId.toString());
+                          mutate(props.row.original.albumId.toString());
                         }}
                       >
                         <MdDelete />

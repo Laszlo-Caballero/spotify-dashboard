@@ -19,6 +19,12 @@ export const AlbumSchema = z.object({
         ].includes(file.type),
       { message: "Invalid image file type" }
     ),
+  fileRes: z
+    .object({
+      fileId: z.number().optional(),
+      fileName: z.string().optional(),
+    })
+    .optional(),
 });
 
 export type AlbumType = z.infer<typeof AlbumSchema>;

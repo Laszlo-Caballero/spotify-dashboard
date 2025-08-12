@@ -20,23 +20,59 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { EnvConfig } from "@/config/env";
 import { AlbumSchema, type AlbumType } from "@/schemas/album.schema";
-import { createAlbum } from "@/services/albumService";
+import { getAlbumById, updateAlbum } from "@/services/albumService";
 import { getArtistByName } from "@/services/artistService";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { cx } from "class-variance-authority";
 import { ChevronDownIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 
-export default function CreateAlbumPage() {
+export default function EditAlbumPage() {
+  const { id } = useParams<{ id: string }>();
+
   const [open, setOpen] = useState(false);
+  const [isUpdateImage, setIsUpdateImage] = useState(false);
   const [searchArtist, setSearchArtist] = useState("");
   const form = useForm({
     resolver: zodResolver(AlbumSchema),
   });
+  const { data: albumData, isLoading: isLoadingAlbum } = useQuery({
+    queryKey: ["album", id],
+    queryFn: () => getAlbumById(id),
+  });
+
+  useEffect(() => {
+    async function loadAlbum() {
+      if (albumData) {
+        form.setValue("NameAlbum", albumData.data.nameAlbum);
+        form.setValue("fileRes", albumData.data.file);
+        form.setValue("releaseDate", new Date(albumData.data.releaseDate));
+        form.setValue(
+          "artists",
+          albumData.data.artists.map((artist) => artist.artistId) || []
+        );
+
+        if (albumData.data.file) {
+          const response = await fetch(
+            `${EnvConfig.api_image}/${albumData.data.file.fileName}`
+          );
+          const blob = await response.blob();
+          const file = new File(
+            [blob],
+            albumData.data.file.fileName || "image.jpg",
+            { type: blob.type }
+          );
+
+          form.setValue("file", file);
+        }
+      }
+    }
+    loadAlbum();
+  }, [albumData, form]);
 
   const { data: artists, isLoading } = useQuery({
     queryKey: ["artists", searchArtist],
@@ -46,13 +82,13 @@ export default function CreateAlbumPage() {
   const navigate = useNavigate();
 
   const { mutate, isPending } = useMutation<unknown, Error, AlbumType>({
-    mutationFn: (data) => createAlbum(data),
+    mutationFn: (data) => updateAlbum({ id, data, isUpdateImage }),
     onSuccess: () => {
-      toast.success("Album created successfully!");
+      toast.success("Album updated successfully!");
       navigate("/album");
     },
     onError: () => {
-      toast.error("Error creating album");
+      toast.error("Error updating album");
     },
   });
 
@@ -62,10 +98,10 @@ export default function CreateAlbumPage() {
 
   return (
     <div className="flex flex-col">
-      {(isLoading || isPending) && <Load />}
+      {(isLoading || isPending || isLoadingAlbum) && <Load />}
 
       <h2 className="scroll-m-20 pb-2 text-3xl font-semibold tracking-tight first:mt-0">
-        Create Album
+        Update Album
       </h2>
 
       <Form {...form}>
@@ -143,6 +179,7 @@ export default function CreateAlbumPage() {
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           field.onChange(file);
+                          setIsUpdateImage(true);
                         }}
                       />
 
@@ -247,7 +284,7 @@ export default function CreateAlbumPage() {
             }}
           />
 
-          <Button className="w-full mt-4">Create Album</Button>
+          <Button className="w-full mt-4">Update Album</Button>
         </form>
       </Form>
     </div>
