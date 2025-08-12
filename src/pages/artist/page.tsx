@@ -1,5 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-import { getAllArtist } from "../../services/artistService";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { deleteArtist, getAllArtist } from "../../services/artistService";
 import TableProvider from "@/components/provider/TableProvider";
 import Load from "@/components/shared/Load/Load";
 import { EnvConfig } from "@/config/env";
@@ -14,16 +14,27 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { MdDelete, MdEdit } from "react-icons/md";
+import { toast } from "sonner";
 
 export default function ArtistPage() {
+  const { mutate, isPending } = useMutation<unknown, Error, string>({
+    mutationFn: deleteArtist,
+    onSuccess: () => {
+      toast.success("Artist deleted successfully");
+    },
+    onError: () => {
+      toast.error("Failed to delete artist");
+    },
+  });
+
   const { data, isLoading } = useQuery({
-    queryKey: ["artists"],
+    queryKey: ["artists", isPending],
     queryFn: getAllArtist,
   });
 
   return (
     <div className="flex flex-col h-full">
-      {isLoading && <Load />}
+      {(isLoading || isPending) && <Load />}
 
       <div className="flex justify-between">
         <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0">
@@ -57,7 +68,7 @@ export default function ArtistPage() {
           {
             header: "Name",
             cell: (props) => {
-              return <div>{props.row.original.Name}</div>;
+              return <div>{props.row.original.name}</div>;
             },
           },
           {
@@ -109,7 +120,12 @@ export default function ArtistPage() {
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger>
-                      <Button variant="destructive" onClick={() => {}}>
+                      <Button
+                        variant="destructive"
+                        onClick={() => {
+                          mutate(props.row.original.artistId.toString());
+                        }}
+                      >
                         <MdDelete />
                       </Button>
                     </TooltipTrigger>

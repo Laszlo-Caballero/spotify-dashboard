@@ -74,3 +74,8 @@ export async function updateArtist({
   const response = await axiosInstance.put(`/artist/${id}`, artist);
   return response.data;
 }
+
+export async function deleteArtist(id?: string) {
+  const response = await axiosInstance.delete(`/artist/${id}`);
+  return response.data;
+}

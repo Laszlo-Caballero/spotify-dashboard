@@ -1,4 +1,4 @@
-import type { Album } from "@/interfaces/response.type";
+import type { Artist } from "@/interfaces/response.type";
 import {
   AlertDialog,
   AlertDialogHeader,
@@ -9,18 +9,17 @@ import { RxCross2 } from "react-icons/rx";
 import TableProvider from "../provider/TableProvider";
 import { EnvConfig } from "@/config/env";
 import { Badge } from "../ui/badge";
-import ModalSongs from "./modalSongs";
 import {
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogTitle,
 } from "@radix-ui/react-alert-dialog";
 
-interface ModalAlbumProps {
-  album: Album[];
+interface ModalArtistProps {
+  artist: Artist[];
 }
 
-export default function ModalAlbum({ album }: ModalAlbumProps) {
+export default function ModalArtist({ artist }: ModalArtistProps) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -38,11 +37,11 @@ export default function ModalAlbum({ album }: ModalAlbumProps) {
           </AlertDialogHeader>
 
           <TableProvider
-            data={album}
+            data={artist}
             columns={[
               {
                 header: "id",
-                accessorKey: "albumId",
+                accessorKey: "artistId",
               },
               {
                 header: "Cover",
@@ -53,19 +52,25 @@ export default function ModalAlbum({ album }: ModalAlbumProps) {
                   return (
                     <img
                       src={`${EnvConfig.api_image}/${image}`}
-                      alt={props.row.original.nameAlbum}
+                      alt={props.row.original.name}
                       className="h-[40px] w-auto"
                     />
                   );
                 },
               },
               {
-                header: "Album title",
-                accessorKey: "NameAlbum",
+                header: "Name",
+                accessorKey: "Name",
               },
               {
-                header: "Release Date",
-                accessorKey: "releaseDate",
+                header: "Description",
+                cell: (props) => {
+                  return (
+                    <div className="max-w-[500px] text-wrap max-h-[70px] overflow-y-scroll">
+                      {props.row.original.description}
+                    </div>
+                  );
+                },
               },
               {
                 header: "Status",
@@ -75,12 +80,6 @@ export default function ModalAlbum({ album }: ModalAlbumProps) {
                       {props.row.original.status ? "Active" : "Inactive"}
                     </Badge>
                   );
-                },
-              },
-              {
-                header: "Songs",
-                cell(props) {
-                  return <ModalSongs songs={props.row.original.songs} />;
                 },
               },
             ]}

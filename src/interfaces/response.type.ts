@@ -6,22 +6,38 @@ export interface ResponseBack<T> {
 
 export interface ArtistResponse {
   artistId: number;
-  Name: string;
+  name: string;
   description: string;
   status: boolean;
   albums: Album[];
   file: File;
 }
 
+export interface AlbumResponse {
+  albumId: number;
+  nameAlbum: string;
+  releaseDate: string;
+  status: boolean;
+  songs: Song[];
+  artists: Artist[];
+  file: File;
+}
+
 export interface Album {
   albumId: number;
-  NameAlbum: string;
+  nameAlbum: string;
   releaseDate: string;
   status?: boolean;
   songs: Song[];
   file?: File;
 }
-
+export interface Artist {
+  artistId: number;
+  name: string;
+  description: string;
+  status: boolean;
+  file?: File;
+}
 export interface Song {
   songId: number;
   title: string;
