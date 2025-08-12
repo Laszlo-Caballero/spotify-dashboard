@@ -20,7 +20,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { EnvConfig } from "@/config/env";
 import { AlbumSchema, type AlbumType } from "@/schemas/album.schema";
-import { getAllArtist } from "@/services/artistService";
+import { getArtistByName } from "@/services/artistService";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { cx } from "class-variance-authority";
@@ -37,7 +37,7 @@ export default function CreateAlbumPage() {
 
   const { data: artists, isLoading } = useQuery({
     queryKey: ["artists", searchArtist],
-    queryFn: getAllArtist,
+    queryFn: () => getArtistByName(searchArtist),
   });
 
   const onSubmit = (data: AlbumType) => {
@@ -177,35 +177,39 @@ export default function CreateAlbumPage() {
                           <h4 className="text-sm leading-none font-medium">
                             Artists List
                           </h4>
-                          {artists?.data.map((value) => {
-                            const findArtist = field.value?.find(
-                              (id) => id === value.artistId
-                            );
-                            return (
-                              <Card
-                                key={value.artistId}
-                                className={cx(
-                                  "cursor-pointer",
-                                  findArtist && "bg-sp-green/50"
-                                )}
-                                onClick={() => {
-                                  const values = field.value || [];
-                                  field.onChange([...values, value.artistId]);
-                                }}
-                              >
-                                <CardContent className="flex items-center gap-x-12">
-                                  <img
-                                    src={`${EnvConfig.api_image}/${value.file?.fileName}`}
-                                    className="w-12 h-12 rounded-full"
-                                  />
+                          {(artists?.data?.length || 0) > 0 ? (
+                            artists?.data.map((value) => {
+                              const findArtist = field.value?.find(
+                                (id) => id === value.artistId
+                              );
+                              return (
+                                <Card
+                                  key={value.artistId}
+                                  className={cx(
+                                    "cursor-pointer",
+                                    findArtist && "bg-sp-green/50"
+                                  )}
+                                  onClick={() => {
+                                    const values = field.value || [];
+                                    field.onChange([...values, value.artistId]);
+                                  }}
+                                >
+                                  <CardContent className="flex items-center gap-x-12">
+                                    <img
+                                      src={`${EnvConfig.api_image}/${value.file?.fileName}`}
+                                      className="w-12 h-12 rounded-full"
+                                    />
 
-                                  <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
-                                    {value.name}
-                                  </h3>
-                                </CardContent>
-                              </Card>
-                            );
-                          })}
+                                    <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
+                                      {value.name}
+                                    </h3>
+                                  </CardContent>
+                                </Card>
+                              );
+                            })
+                          ) : (
+                            <span>No artists found</span>
+                          )}
                         </div>
                       </ScrollArea>
                     </div>

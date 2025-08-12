@@ -20,6 +20,14 @@ export async function getArtistById(
   return data;
 }
 
+export async function getArtistByName(
+  name: string
+): Promise<ResponseBack<ArtistResponse[]>> {
+  const response = await axiosInstance.get(`/artist/search?name=${name}`);
+  const data = response.data;
+  return data;
+}
+
 export async function createArtist(data: ArtistType) {
   const formData = new FormData();
   formData.append("file", data.file);
