@@ -5,6 +5,7 @@ import type {
   ResponseBack,
 } from "../interfaces/response.type";
 import { axiosInstance } from "../lib/axios";
+import { uploadFile } from "./fileSerivce";
 
 export async function getAllArtist(): Promise<ResponseBack<ArtistResponse[]>> {
   const response = await axiosInstance.get("/artist");
@@ -29,17 +30,16 @@ export async function getArtistByName(
 }
 
 export async function createArtist(data: ArtistType) {
-  const formData = new FormData();
-  formData.append("file", data.file);
-
-  const res_image = await axiosInstance.post("/files", formData);
-
-  const image: ResponseBack<File> = res_image.data;
+  const [cover, hero] = await Promise.all([
+    uploadFile(data.file),
+    uploadFile(data.heroFile),
+  ]);
 
   const artist = {
     Name: data.Name,
     description: data.description,
-    coverArtist: image.data.fileId,
+    coverArtist: cover.data.fileId,
+    heroCover: hero.data.fileId,
   };
 
   const response = await axiosInstance.post("/artist", artist);
@@ -50,10 +50,12 @@ export async function updateArtist({
   id,
   data,
   isUpdateImage,
+  isUpdateHeroImage,
 }: {
   id?: string;
   data: ArtistType;
   isUpdateImage: boolean;
+  isUpdateHeroImage: boolean;
 }) {
   const formData = new FormData();
   formData.append("file", data.file);
@@ -72,11 +74,30 @@ export async function updateArtist({
       message: "",
     };
   }
+  const formDataHero = new FormData();
+  formDataHero.append("file", data.heroFile);
+
+  let hero: ResponseBack<File>;
+
+  if (isUpdateHeroImage) {
+    const res_hero = await axiosInstance.post("/files", formDataHero);
+    hero = res_hero.data;
+  } else {
+    hero = {
+      data: {
+        fileId: data?.heroRes?.fileId || 0,
+        fileName: data?.heroRes?.fileName || "",
+      },
+      code: 200,
+      message: "",
+    };
+  }
 
   const artist = {
     Name: data.Name,
     description: data.description,
     coverArtist: image.data?.fileId,
+    heroCover: hero.data?.fileId,
   };
 
   const response = await axiosInstance.put(`/artist/${id}`, artist);

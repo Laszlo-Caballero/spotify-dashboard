@@ -17,12 +17,31 @@ export const ArtistSchema = z.object({
         ].includes(file.type),
       { message: "Invalid image file type" }
     ),
+  heroFile: z
+    .instanceof(File)
+    .refine(
+      (file) =>
+        [
+          "image/png",
+          "image/jpeg",
+          "image/jpg",
+          "image/svg+xml",
+          "image/gif",
+        ].includes(file.type),
+      { message: "Invalid image file type" }
+    ),
   fileRes: z
     .object({
       fileId: z.number().optional(),
       fileName: z.string().optional(),
     })
     .optional(),
+  heroRes: z
+    .object({
+      fileId: z.number().optional(),
+      fileName: z.string().optional(),
+    })
+    .or(z.null()),
 });
 
 export type ArtistType = z.infer<typeof ArtistSchema>;

@@ -23,6 +23,7 @@ import { toast } from "sonner";
 export default function EditPage() {
   const { id } = useParams<{ id: string }>();
   const [isUpdateImage, setIsUpdateImage] = useState(false);
+  const [isUpdateHeroImage, setIsUpdateHeroImage] = useState(false);
 
   const form = useForm({
     resolver: zodResolver(ArtistSchema),
@@ -41,6 +42,7 @@ export default function EditPage() {
         form.setValue("Name", artistData.data.name);
         form.setValue("description", artistData.data.description);
         form.setValue("fileRes", artistData.data.file);
+        form.setValue("heroRes", artistData.data.heroFile || null);
 
         if (artistData.data.file) {
           const response = await fetch(
@@ -55,13 +57,28 @@ export default function EditPage() {
 
           form.setValue("file", file);
         }
+
+        if (artistData.data.heroFile) {
+          const response = await fetch(
+            `${EnvConfig.api_image}/${artistData.data.heroFile.fileName}`
+          );
+          const blob = await response.blob();
+          const file = new File(
+            [blob],
+            artistData.data.heroFile.fileName || "image.jpg",
+            { type: blob.type }
+          );
+
+          form.setValue("heroFile", file);
+        }
       }
     }
     loadArtist();
   }, [artistData, form]);
 
   const { mutate, isPending } = useMutation<unknown, Error, ArtistType>({
-    mutationFn: (data) => updateArtist({ id, data, isUpdateImage }),
+    mutationFn: (data) =>
+      updateArtist({ id, data, isUpdateImage, isUpdateHeroImage }),
     onSuccess: () => {
       toast.success("Artist update successfully");
       navigate("/artist");
@@ -74,7 +91,7 @@ export default function EditPage() {
   const handleSubmit = (data: ArtistType) => {
     mutate(data);
   };
-
+  console.log("form", form.formState.errors);
   return (
     <div className="flex flex-col">
       {isPending && <Load />}
@@ -161,6 +178,45 @@ export default function EditPage() {
             }}
           />
 
+          <FormField
+            control={form.control}
+            name="heroFile"
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel>Hero Cover</FormLabel>
+                  <FormControl>
+                    <div className="grid grid-cols-2 w-full gap-x-4">
+                      <Input
+                        placeholder="Enter hero cover name"
+                        type="file"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          field.onChange(file);
+                          setIsUpdateHeroImage(true);
+                        }}
+                      />
+
+                      <div className="flex flex-col gap-y-4">
+                        <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
+                          Image Preview
+                        </h3>
+
+                        {field.value && (
+                          <img
+                            src={URL.createObjectURL(field.value)}
+                            alt="Hero Cover"
+                            className="max-h-32 w-44"
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
+          />
           <Button className="w-full mt-4">Update Artist</Button>
         </form>
       </Form>

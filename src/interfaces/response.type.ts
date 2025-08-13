@@ -11,6 +11,7 @@ export interface ArtistResponse {
   status: boolean;
   albums: Album[];
   file: File;
+  heroFile?: File;
 }
 
 export interface AlbumResponse {
