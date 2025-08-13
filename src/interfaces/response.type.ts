@@ -24,6 +24,15 @@ export interface AlbumResponse {
   file: File;
 }
 
+export interface SongResponse {
+  songId: number;
+  title: string;
+  views: number;
+  status: boolean;
+  albums: Album[];
+  file?: File;
+}
+
 export interface Album {
   albumId: number;
   nameAlbum: string;

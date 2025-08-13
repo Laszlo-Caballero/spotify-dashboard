@@ -15,12 +15,14 @@ import {
   AlertDialogContent,
   AlertDialogTitle,
 } from "@radix-ui/react-alert-dialog";
+import type { CellContext } from "@tanstack/react-table";
 
 interface ModalAlbumProps {
   album: Album[];
+  withOutSongs?: boolean;
 }
 
-export default function ModalAlbum({ album }: ModalAlbumProps) {
+export default function ModalAlbum({ album, withOutSongs }: ModalAlbumProps) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -61,7 +63,7 @@ export default function ModalAlbum({ album }: ModalAlbumProps) {
               },
               {
                 header: "Album title",
-                accessorKey: "NameAlbum",
+                accessorKey: "nameAlbum",
               },
               {
                 header: "Release Date",
@@ -77,12 +79,16 @@ export default function ModalAlbum({ album }: ModalAlbumProps) {
                   );
                 },
               },
-              {
-                header: "Songs",
-                cell(props) {
-                  return <ModalSongs songs={props.row.original.songs} />;
-                },
-              },
+              ...(!withOutSongs
+                ? [
+                    {
+                      header: "Songs",
+                      cell(props: CellContext<Album, unknown>) {
+                        return <ModalSongs songs={props.row.original.songs} />;
+                      },
+                    },
+                  ]
+                : []),
             ]}
           />
         </div>
