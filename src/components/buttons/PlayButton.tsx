@@ -6,18 +6,21 @@ import { Badge } from "../ui/badge";
 
 interface PlayButtonProps {
   file?: File;
+  otherUrl?: string;
 }
 
 export default function PlayButton(props: PlayButtonProps) {
   const file = props.file;
-  const isFile = file?.fileName;
+  const isFile = file?.fileName || props.otherUrl;
   const refAudio = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   return (
     <div>
       <audio className="hidden" ref={refAudio}>
         <source
-          src={`${EnvConfig.api_image}/${file?.fileName}`}
+          src={
+            file ? `${EnvConfig.api_image}/${file.fileName}` : props.otherUrl
+          }
           type="audio/mpeg"
         />
         Your browser does not support the audio element.

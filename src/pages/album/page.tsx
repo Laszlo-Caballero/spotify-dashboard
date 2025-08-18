@@ -29,7 +29,7 @@ export default function AlbumPage() {
   });
   const { data, isLoading } = useQuery({
     queryKey: ["albums", isPending],
-    queryFn: getAllAlbums,
+    queryFn: () => getAllAlbums(""),
   });
 
   return (

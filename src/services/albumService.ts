@@ -6,8 +6,14 @@ import type {
 import { axiosInstance } from "@/lib/axios";
 import type { AlbumType } from "@/schemas/album.schema";
 
-export async function getAllAlbums(): Promise<ResponseBack<AlbumResponse[]>> {
-  const response = await axiosInstance.get("/album");
+export async function getAllAlbums(
+  artist?: string
+): Promise<ResponseBack<AlbumResponse[]>> {
+  const response = await axiosInstance.get("/album", {
+    params: {
+      artist,
+    },
+  });
   const data = response.data;
   return data;
 }
